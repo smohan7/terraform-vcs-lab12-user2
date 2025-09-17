@@ -367,3 +367,22 @@ resource "aws_s3_bucket_public_access_block" "static_assets" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+# CloudWatch Alarm for monitoring VCS-driven deployments
+resource "aws_cloudwatch_metric_alarm" "high_cpu" {
+  alarm_name          = "${local.name_prefix}-high-cpu"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods  = "2"
+  metric_name         = "CPUUtilization"
+  namespace           = "AWS/EC2"
+  period              = "300"
+  statistic           = "Average"
+  threshold           = "80"
+  alarm_description   = "Monitors CPU for VCS-deployed instances"
+  alarm_actions       = []
+
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.web.name
+  }
+
+  tags = local.common_tags
+}
